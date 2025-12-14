@@ -3,11 +3,203 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sticky Scroll</title>
+  <title>Collapsible Lists</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      height: 500px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      background: #fff;
+    }
+
+    /* Main list item styles */
+    .list-item {
+      background: #fff;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .list-title {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #4a90d9;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .list-title:hover {
+      background: #3a7bc8;
+    }
+
+    .list-title::after {
+      content: '▼';
+      font-size: 12px;
+    }
+
+    .list-item.collapsed .list-title::after {
+      transform: rotate(-90deg);
+    }
+
+    .list-content {
+      overflow: hidden;
+    }
+
+    .list-item.collapsed .list-content {
+      display: none;
+    }
+
+    /* Subtitle styles */
+    .sub-item {
+      border-bottom: 1px solid #eee;
+    }
+
+    .sub-item:last-child {
+      border-bottom: none;
+    }
+
+    .sub-title {
+      padding: 12px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      color: #333;
+      font-weight: 500;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .sub-title:hover {
+      background: #e9ecef;
+    }
+
+    .sub-title::after {
+      content: '▼';
+      font-size: 10px;
+      color: #666;
+    }
+
+    .sub-item.collapsed .sub-title::after {
+      transform: rotate(-90deg);
+    }
+
+    .sub-content {
+      padding: 12px 20px 12px 36px;
+      background: #fff;
+      color: #555;
+    }
+
+    .sub-item.collapsed .sub-content {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div>
-    Hello
+  <div class="container">
+    <div class="list-item">
+      <div class="list-title">Section 1: Getting Started</div>
+      <div class="list-content">
+        <div class="sub-item">
+          <div class="sub-title">Introduction</div>
+          <div class="sub-content">
+            Welcome to our guide! This section covers the basics of getting started with our platform.
+          </div>
+        </div>
+        <div class="sub-item">
+          <div class="sub-title">Installation</div>
+          <div class="sub-content">
+            Follow these steps to install the software on your machine. Make sure you have the prerequisites installed first.
+          </div>
+        </div>
+        <div class="sub-item">
+          <div class="sub-title">Configuration</div>
+          <div class="sub-content">
+            Configure your settings by editing the config file. You can customize various options to suit your needs.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-item">
+      <div class="list-title">Section 2: Advanced Features</div>
+      <div class="list-content">
+        <div class="sub-item">
+          <div class="sub-title">API Integration</div>
+          <div class="sub-content">
+            Learn how to integrate with our API. We provide RESTful endpoints for all major operations.
+          </div>
+        </div>
+        <div class="sub-item">
+          <div class="sub-title">Custom Plugins</div>
+          <div class="sub-content">
+            Create your own plugins to extend the functionality. Our plugin system is flexible and powerful.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-item">
+      <div class="list-title">Section 3: Troubleshooting</div>
+      <div class="list-content">
+        <div class="sub-item">
+          <div class="sub-title">Common Issues</div>
+          <div class="sub-content">
+            Here are solutions to the most frequently encountered problems and how to resolve them quickly.
+          </div>
+        </div>
+        <div class="sub-item">
+          <div class="sub-title">Error Messages</div>
+          <div class="sub-content">
+            A comprehensive list of error messages and their meanings, along with recommended fixes.
+          </div>
+        </div>
+        <div class="sub-item">
+          <div class="sub-title">Getting Help</div>
+          <div class="sub-content">
+            Contact our support team or visit our community forums for additional assistance.
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Toggle main list items
+    document.querySelectorAll('.list-title').forEach(title => {
+      title.addEventListener('click', () => {
+        title.parentElement.classList.toggle('collapsed');
+      });
+    });
+
+    // Toggle sub items
+    document.querySelectorAll('.sub-title').forEach(subTitle => {
+      subTitle.addEventListener('click', () => {
+        subTitle.parentElement.classList.toggle('collapsed');
+      });
+    });
+  </script>
 </body>
 </html>
