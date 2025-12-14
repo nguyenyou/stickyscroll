@@ -25,6 +25,47 @@
       overflow-y: auto;
       border: 1px solid #ddd;
       background: #fff;
+      position: relative;
+    }
+
+    /* Sticky header container */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: none;
+    }
+
+    .sticky-header.visible {
+      display: block;
+    }
+
+    .sticky-title {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #4a90d9;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .sticky-subtitle {
+      padding: 12px 20px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      color: #333;
+      font-weight: 500;
+      border-bottom: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .sticky-subtitle.visible {
+      display: flex;
     }
 
     /* Main list item styles */
@@ -118,7 +159,13 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="scrollContainer">
+    <!-- Sticky header that follows scroll -->
+    <div class="sticky-header" id="stickyHeader">
+      <div class="sticky-title" id="stickyTitle"></div>
+      <div class="sticky-subtitle" id="stickySubtitle"></div>
+    </div>
+
     <div class="list-item">
       <div class="list-title">Section 1: Getting Started</div>
       <div class="list-content">
@@ -241,6 +288,7 @@
     document.querySelectorAll('.list-title').forEach(title => {
       title.addEventListener('click', () => {
         title.parentElement.classList.toggle('collapsed');
+        updateStickyHeader(); // Update sticky header after toggle
       });
     });
 
@@ -248,8 +296,88 @@
     document.querySelectorAll('.sub-title').forEach(subTitle => {
       subTitle.addEventListener('click', () => {
         subTitle.parentElement.classList.toggle('collapsed');
+        updateStickyHeader(); // Update sticky header after toggle
       });
     });
+
+    // Sticky scroll functionality
+    const container = document.getElementById('scrollContainer');
+    const stickyHeader = document.getElementById('stickyHeader');
+    const stickyTitle = document.getElementById('stickyTitle');
+    const stickySubtitle = document.getElementById('stickySubtitle');
+
+    function updateStickyHeader() {
+      const containerRect = container.getBoundingClientRect();
+      const scrollTop = container.scrollTop;
+      const stickyHeaderHeight = stickyHeader.offsetHeight;
+
+      // Get all list items (sections)
+      const listItems = container.querySelectorAll('.list-item');
+
+      let currentSection = null;
+      let currentSubItem = null;
+
+      // Find the current section being viewed
+      listItems.forEach(listItem => {
+        const listTitle = listItem.querySelector('.list-title');
+        const listTitleRect = listTitle.getBoundingClientRect();
+        const listItemRect = listItem.getBoundingClientRect();
+
+        // Check if this section's title has scrolled past the top of the container
+        // but the section is still visible (not completely scrolled past)
+        const titleTop = listTitleRect.top - containerRect.top;
+        const sectionBottom = listItemRect.bottom - containerRect.top;
+
+        if (titleTop <= 0 && sectionBottom > stickyHeaderHeight) {
+          currentSection = listItem;
+        }
+      });
+
+      // If we have a current section, find the current sub-item
+      if (currentSection && !currentSection.classList.contains('collapsed')) {
+        const subItems = currentSection.querySelectorAll('.sub-item');
+        const stickyTitleHeight = stickyTitle.offsetHeight || 54; // Approximate height
+
+        subItems.forEach(subItem => {
+          const subTitle = subItem.querySelector('.sub-title');
+          const subTitleRect = subTitle.getBoundingClientRect();
+          const subItemRect = subItem.getBoundingClientRect();
+
+          // Check if this sub-item's title has scrolled past the sticky title
+          // but the sub-item content is still visible
+          const subTitleTop = subTitleRect.top - containerRect.top - stickyTitleHeight;
+          const subItemBottom = subItemRect.bottom - containerRect.top - stickyTitleHeight;
+
+          if (subTitleTop <= 0 && subItemBottom > 0) {
+            currentSubItem = subItem;
+          }
+        });
+      }
+
+      // Update sticky header visibility and content
+      if (currentSection) {
+        const listTitle = currentSection.querySelector('.list-title');
+        stickyTitle.textContent = listTitle.textContent;
+        stickyHeader.classList.add('visible');
+
+        if (currentSubItem && !currentSubItem.classList.contains('collapsed')) {
+          const subTitle = currentSubItem.querySelector('.sub-title');
+          stickySubtitle.textContent = subTitle.textContent;
+          stickySubtitle.classList.add('visible');
+        } else {
+          stickySubtitle.classList.remove('visible');
+        }
+      } else {
+        stickyHeader.classList.remove('visible');
+        stickySubtitle.classList.remove('visible');
+      }
+    }
+
+    // Listen to scroll events on the container
+    container.addEventListener('scroll', updateStickyHeader);
+
+    // Initial check
+    updateStickyHeader();
   </script>
 </body>
 </html>
