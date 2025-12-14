@@ -34,10 +34,15 @@
       top: 0;
       z-index: 100;
       display: none;
+      overflow: hidden;
     }
 
     .sticky-header.visible {
       display: block;
+    }
+
+    .sticky-title-wrapper {
+      overflow: hidden;
     }
 
     .sticky-title {
@@ -50,6 +55,11 @@
       font-weight: 600;
       font-size: 18px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      transition: transform 0.05s linear;
+    }
+
+    .sticky-subtitle-wrapper {
+      overflow: hidden;
     }
 
     .sticky-subtitle {
@@ -62,6 +72,7 @@
       font-weight: 500;
       border-bottom: 1px solid #ddd;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.05s linear;
     }
 
     .sticky-subtitle.visible {
@@ -162,8 +173,12 @@
   <div class="container" id="scrollContainer">
     <!-- Sticky header that follows scroll -->
     <div class="sticky-header" id="stickyHeader">
-      <div class="sticky-title" id="stickyTitle"></div>
-      <div class="sticky-subtitle" id="stickySubtitle"></div>
+      <div class="sticky-title-wrapper" id="stickyTitleWrapper">
+        <div class="sticky-title" id="stickyTitle"></div>
+      </div>
+      <div class="sticky-subtitle-wrapper" id="stickySubtitleWrapper">
+        <div class="sticky-subtitle" id="stickySubtitle"></div>
+      </div>
     </div>
 
     <div class="list-item">
@@ -303,55 +318,111 @@
     // Sticky scroll functionality
     const container = document.getElementById('scrollContainer');
     const stickyHeader = document.getElementById('stickyHeader');
+    const stickyTitleWrapper = document.getElementById('stickyTitleWrapper');
     const stickyTitle = document.getElementById('stickyTitle');
+    const stickySubtitleWrapper = document.getElementById('stickySubtitleWrapper');
     const stickySubtitle = document.getElementById('stickySubtitle');
 
     function updateStickyHeader() {
       const containerRect = container.getBoundingClientRect();
-      const scrollTop = container.scrollTop;
-      const stickyHeaderHeight = stickyHeader.offsetHeight;
+      const containerTop = containerRect.top;
 
       // Get all list items (sections)
-      const listItems = container.querySelectorAll('.list-item');
+      const listItems = Array.from(container.querySelectorAll('.list-item'));
 
       let currentSection = null;
+      let nextSection = null;
       let currentSubItem = null;
+      let nextSubItem = null;
 
-      // Find the current section being viewed
-      listItems.forEach(listItem => {
+      // Find the current and next section being viewed
+      for (let i = 0; i < listItems.length; i++) {
+        const listItem = listItems[i];
         const listTitle = listItem.querySelector('.list-title');
         const listTitleRect = listTitle.getBoundingClientRect();
         const listItemRect = listItem.getBoundingClientRect();
 
-        // Check if this section's title has scrolled past the top of the container
-        // but the section is still visible (not completely scrolled past)
-        const titleTop = listTitleRect.top - containerRect.top;
-        const sectionBottom = listItemRect.bottom - containerRect.top;
+        const titleTop = listTitleRect.top - containerTop;
+        const sectionBottom = listItemRect.bottom - containerTop;
 
-        if (titleTop <= 0 && sectionBottom > stickyHeaderHeight) {
+        // Current section: title scrolled past top, section still visible
+        if (titleTop <= 0 && sectionBottom > 0) {
           currentSection = listItem;
+          // Next section is the one after current
+          if (i + 1 < listItems.length) {
+            nextSection = listItems[i + 1];
+          }
         }
-      });
+      }
 
-      // If we have a current section, find the current sub-item
+      // Get heights for calculations
+      const stickyTitleHeight = stickyTitle.offsetHeight || 54;
+      const stickySubtitleHeight = stickySubtitle.offsetHeight || 44;
+      const totalStickyHeight = stickyTitleHeight + (stickySubtitle.classList.contains('visible') ? stickySubtitleHeight : 0);
+
+      // Calculate push offset for section title
+      let titlePushOffset = 0;
+      if (currentSection && nextSection) {
+        const nextTitleRect = nextSection.querySelector('.list-title').getBoundingClientRect();
+        const nextTitleTop = nextTitleRect.top - containerTop;
+
+        // When next section title is approaching the sticky header area
+        if (nextTitleTop < totalStickyHeight) {
+          titlePushOffset = nextTitleTop - totalStickyHeight;
+        }
+      }
+
+      // If we have a current section, find current and next sub-item
       if (currentSection && !currentSection.classList.contains('collapsed')) {
-        const subItems = currentSection.querySelectorAll('.sub-item');
-        const stickyTitleHeight = stickyTitle.offsetHeight || 54; // Approximate height
+        const subItems = Array.from(currentSection.querySelectorAll('.sub-item'));
 
-        subItems.forEach(subItem => {
+        for (let i = 0; i < subItems.length; i++) {
+          const subItem = subItems[i];
           const subTitle = subItem.querySelector('.sub-title');
           const subTitleRect = subTitle.getBoundingClientRect();
           const subItemRect = subItem.getBoundingClientRect();
 
-          // Check if this sub-item's title has scrolled past the sticky title
-          // but the sub-item content is still visible
-          const subTitleTop = subTitleRect.top - containerRect.top - stickyTitleHeight;
-          const subItemBottom = subItemRect.bottom - containerRect.top - stickyTitleHeight;
+          const subTitleTop = subTitleRect.top - containerTop - stickyTitleHeight;
+          const subItemBottom = subItemRect.bottom - containerTop - stickyTitleHeight;
 
+          // Current sub-item: title scrolled past sticky title, content still visible
           if (subTitleTop <= 0 && subItemBottom > 0) {
             currentSubItem = subItem;
+            // Next sub-item is the one after current
+            if (i + 1 < subItems.length) {
+              nextSubItem = subItems[i + 1];
+            }
           }
-        });
+        }
+      }
+
+      // Calculate push offset for subtitle
+      let subtitlePushOffset = 0;
+      if (currentSubItem && nextSubItem) {
+        const nextSubTitleRect = nextSubItem.querySelector('.sub-title').getBoundingClientRect();
+        const nextSubTitleTop = nextSubTitleRect.top - containerTop - stickyTitleHeight;
+
+        // When next subtitle is approaching the sticky subtitle area
+        if (nextSubTitleTop < stickySubtitleHeight) {
+          subtitlePushOffset = nextSubTitleTop - stickySubtitleHeight;
+        }
+      }
+
+      // Also check if next section is pushing both title and subtitle
+      if (currentSection && nextSection) {
+        const nextTitleRect = nextSection.querySelector('.list-title').getBoundingClientRect();
+        const nextTitleTop = nextTitleRect.top - containerTop;
+
+        // When next section is pushing subtitle
+        if (stickySubtitle.classList.contains('visible') && nextTitleTop < stickyTitleHeight + stickySubtitleHeight) {
+          const pushAmount = nextTitleTop - stickyTitleHeight - stickySubtitleHeight;
+          subtitlePushOffset = Math.min(subtitlePushOffset || 0, pushAmount);
+        }
+
+        // When next section is pushing title
+        if (nextTitleTop < stickyTitleHeight) {
+          titlePushOffset = nextTitleTop - stickyTitleHeight;
+        }
       }
 
       // Update sticky header visibility and content
@@ -360,16 +431,25 @@
         stickyTitle.textContent = listTitle.textContent;
         stickyHeader.classList.add('visible');
 
+        // Apply push transform to title
+        stickyTitle.style.transform = `translateY(${Math.min(0, titlePushOffset)}px)`;
+
         if (currentSubItem && !currentSubItem.classList.contains('collapsed')) {
           const subTitle = currentSubItem.querySelector('.sub-title');
           stickySubtitle.textContent = subTitle.textContent;
           stickySubtitle.classList.add('visible');
+
+          // Apply push transform to subtitle
+          stickySubtitle.style.transform = `translateY(${Math.min(0, subtitlePushOffset)}px)`;
         } else {
           stickySubtitle.classList.remove('visible');
+          stickySubtitle.style.transform = '';
         }
       } else {
         stickyHeader.classList.remove('visible');
         stickySubtitle.classList.remove('visible');
+        stickyTitle.style.transform = '';
+        stickySubtitle.style.transform = '';
       }
     }
 
