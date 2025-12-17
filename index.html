@@ -46,6 +46,7 @@
       user-select: none;
       position: sticky;
       top: 0;
+      z-index: 1;
     }
 
     .list-title:hover {
@@ -61,13 +62,11 @@
       transform: rotate(-90deg);
     }
 
-    .list-content {
-      overflow: hidden;
-    }
 
     .list-item.collapsed .list-content {
       display: none;
     }
+
     .sub-title {
       padding: 12px 20px;
       cursor: pointer;
@@ -78,6 +77,8 @@
       color: #333;
       font-weight: 500;
       user-select: none;
+      position: sticky;
+      top: 52px; /* Height of .list-title (16px padding * 2 + 20px line-height) */
     }
 
     .sub-title:hover {
