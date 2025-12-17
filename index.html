@@ -31,7 +31,6 @@
     /* Main list item styles */
     .list-item {
       background: #fff;
-      overflow: hidden;
     }
 
     .list-title {
@@ -45,6 +44,8 @@
       font-weight: 600;
       font-size: 18px;
       user-select: none;
+      position: sticky;
+      top: 0;
     }
 
     .list-title:hover {
@@ -106,16 +107,6 @@
 </head>
 <body>
   <div class="container" id="scrollContainer">
-    <!-- Sticky header that follows scroll -->
-    <div class="sticky-header" id="stickyHeader">
-      <div class="sticky-title-wrapper" id="stickyTitleWrapper">
-        <div class="sticky-title" id="stickyTitle"></div>
-      </div>
-      <div class="sticky-subtitle-wrapper" id="stickySubtitleWrapper">
-        <div class="sticky-subtitle" id="stickySubtitle"></div>
-      </div>
-    </div>
-
     <div class="list-item">
       <div class="list-title">Section 1: Getting Started</div>
       <div class="list-content">
