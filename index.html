@@ -252,6 +252,19 @@
     // Sticky shadow detection using IntersectionObserver
     const container = document.getElementById('scrollContainer');
 
+    // Track stuck state for smart shadow logic
+    const stuckState = new Map();
+
+    function updateShadows(listItem) {
+      const listTitle = listItem.querySelector('.list-title');
+      const stuckSubTitles = listItem.querySelectorAll('.sub-title.is-stuck');
+
+      // List title only gets shadow if it's stuck AND no sub-titles are stuck
+      if (listTitle && stuckState.get(listTitle)) {
+        listTitle.classList.toggle('is-stuck', stuckSubTitles.length === 0);
+      }
+    }
+
     // For .list-title elements (sticky at top: 0)
     document.querySelectorAll('.list-title').forEach(title => {
       const sentinel = document.createElement('div');
@@ -262,7 +275,9 @@
 
       const observer = new IntersectionObserver(
         ([entry]) => {
+          stuckState.set(title, !entry.isIntersecting);
           title.classList.toggle('is-stuck', !entry.isIntersecting);
+          updateShadows(title.parentElement);
         },
         { root: container, threshold: 0 }
       );
@@ -280,6 +295,9 @@
       const observer = new IntersectionObserver(
         ([entry]) => {
           subTitle.classList.toggle('is-stuck', !entry.isIntersecting);
+          // Update parent list-item's shadow logic
+          const listItem = subTitle.closest('.list-item');
+          if (listItem) updateShadows(listItem);
         },
         { root: container, rootMargin: '-52px 0px 0px 0px', threshold: 0 }
       );
