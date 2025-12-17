@@ -104,6 +104,15 @@
     .sub-item.collapsed .sub-content {
       display: none;
     }
+
+    /* Sticky shadow styles */
+    .list-title.is-stuck {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .sub-title.is-stuck {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -238,6 +247,43 @@
       subTitle.addEventListener('click', () => {
         subTitle.parentElement.classList.toggle('collapsed');
       });
+    });
+
+    // Sticky shadow detection using IntersectionObserver
+    const container = document.getElementById('scrollContainer');
+
+    // For .list-title elements (sticky at top: 0)
+    document.querySelectorAll('.list-title').forEach(title => {
+      const sentinel = document.createElement('div');
+      sentinel.className = 'sticky-sentinel';
+      sentinel.style.cssText = 'position: absolute; height: 1px; width: 100%; top: 0; left: 0; pointer-events: none;';
+      title.parentElement.style.position = 'relative';
+      title.parentElement.insertBefore(sentinel, title);
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          title.classList.toggle('is-stuck', !entry.isIntersecting);
+        },
+        { root: container, threshold: 0 }
+      );
+      observer.observe(sentinel);
+    });
+
+    // For .sub-title elements (sticky at top: 52px)
+    document.querySelectorAll('.sub-title').forEach(subTitle => {
+      const sentinel = document.createElement('div');
+      sentinel.className = 'sticky-sentinel';
+      sentinel.style.cssText = 'position: absolute; height: 1px; width: 100%; top: 0; left: 0; pointer-events: none;';
+      subTitle.parentElement.style.position = 'relative';
+      subTitle.parentElement.insertBefore(sentinel, subTitle);
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          subTitle.classList.toggle('is-stuck', !entry.isIntersecting);
+        },
+        { root: container, rootMargin: '-52px 0px 0px 0px', threshold: 0 }
+      );
+      observer.observe(sentinel);
     });
   </script>
 </body>
