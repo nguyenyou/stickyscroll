@@ -189,8 +189,9 @@ class StickyObserverContext(container: Element) {
         val isStuck = !entry.isIntersecting
         subTitle.classList.toggle("is-stuck", isStuck)
         setShadow(subTitle, isStuck, isList = false)
-        val listItem = subTitle.closest(".list-item")
-        if (listItem != null) updateShadows(listItem)
+        Option(subTitle.closest(".list-item")).foreach { listItem =>
+          updateShadows(listItem)
+        }
       }
     },
     js.Dynamic

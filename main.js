@@ -1043,9 +1043,10 @@ function $c_LStickyObserverContext(container) {
       var isStuck$1 = (!$uZ(x0$1.isIntersecting));
       subTitle.classList.toggle("is-stuck", isStuck$1);
       $m_Lmain$package$().setShadow__Lorg_scalajs_dom_HTMLElement__Z__Z__V(subTitle, isStuck$1, false);
-      var listItem = subTitle.closest(".list-item");
-      if ((listItem !== null)) {
-        $m_Lmain$package$().updateShadows__Lorg_scalajs_dom_Element__V(listItem);
+      var this$9 = $n($m_s_Option$().apply__O__s_Option(subTitle.closest(".list-item")));
+      if ((!this$9.isEmpty__Z())) {
+        var x0$2 = this$9.get__O();
+        $m_Lmain$package$().updateShadows__Lorg_scalajs_dom_Element__V(x0$2);
       }
       i$1 = ((1 + i$1) | 0);
     }
@@ -3459,8 +3460,7 @@ $c_Lmain$package$.prototype.setShadow__Lorg_scalajs_dom_HTMLElement__Z__Z__V = (
   }
 });
 $c_Lmain$package$.prototype.updateShadows__Lorg_scalajs_dom_Element__V = (function(listItem) {
-  var listTitleOpt = $m_s_Option$().apply__O__s_Option(listItem.querySelector(".list-title"));
-  var this$1 = $n(listTitleOpt);
+  var this$1 = $n($m_s_Option$().apply__O__s_Option(listItem.querySelector(".list-title")));
   if ((!this$1.isEmpty__Z())) {
     var x0 = this$1.get__O();
     var stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck");
