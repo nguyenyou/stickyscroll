@@ -3686,7 +3686,11 @@ $c_Lmain$package$.prototype.app__Lcom_raquo_laminar_nodes_ReactiveHtmlElement = 
   var mods = $x_3.wrapRefArray__AO__sci_ArraySeq(new ($d_Lcom_raquo_laminar_modifiers_Modifier.getArrayOf().constr)([$x_2, $x_1, $f_Lcom_raquo_laminar_api_Implicits__nodeSeqToModifier__O__Lcom_raquo_laminar_modifiers_RenderableSeq__Lcom_raquo_laminar_modifiers_Modifier(this$2, nodes, renderableSeq)]));
   return $as_Lcom_raquo_laminar_nodes_ReactiveHtmlElement($f_Lcom_raquo_laminar_nodes_ReactiveElement__amend__sci_Seq__Lcom_raquo_laminar_nodes_ReactiveElement(this$3, mods));
 });
+$c_Lmain$package$.prototype.printnum__I__V = (function(num) {
+  console.log(num);
+});
 $c_Lmain$package$.prototype.run__V = (function() {
+  $m_Lmain$package$().printnum__I__V(5);
   var container = document.getElementById("app");
   $n($m_Lcom_raquo_laminar_api_package$().Lcom_raquo_laminar_api_package$__f_L);
   var rootNode = $m_Lmain$package$().app__Lcom_raquo_laminar_nodes_ReactiveHtmlElement();

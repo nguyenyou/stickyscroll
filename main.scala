@@ -287,8 +287,14 @@ def app(): HtmlElement = {
   )
 }
 
+def printnum(num: Int): Unit = {
+  org.scalajs.dom.console.log(num)
+}
+
 @main
 def run(): Unit = {
+  val x: Int = 5
+  printnum(x)
   val container = dom.document.getElementById("app")
   render(container, app())
 }
