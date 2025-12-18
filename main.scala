@@ -141,6 +141,13 @@ val sectionData: List[Section] = List(
 // Track stuck state for smart shadow logic
 var stuckState: Map[Element, Boolean] = Map.empty
 
+// Helper to toggle shadow classes
+def setShadow(el: HTMLElement, stuck: Boolean, isList: Boolean): Unit = {
+  val shadowClass = if (isList) "shadow-md" else "shadow"
+  if (stuck) el.classList.add(shadowClass)
+  else el.classList.remove(shadowClass)
+}
+
 def updateShadows(listItem: Element): Unit = {
   val listTitle = listItem.querySelector(".list-title")
   val stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck")
@@ -153,30 +160,9 @@ def updateShadows(listItem: Element): Unit = {
   }
 }
 
-def setupStickyObservers(container: Element): Unit = {
-  // Helper to create a sentinel element using Tailwind classes
-  def createSentinel(): HTMLElement = {
-    val sentinel = dom.document.createElement("div").asInstanceOf[HTMLElement]
-    sentinel.className = "absolute h-px w-full top-0 left-0 pointer-events-none"
-    sentinel
-  }
-
-  // Helper to toggle shadow classes
-  def setShadow(el: HTMLElement, stuck: Boolean, isList: Boolean): Unit = {
-    val shadowClass = if (isList) "shadow-md" else "shadow"
-    if (stuck) el.classList.add(shadowClass)
-    else el.classList.remove(shadowClass)
-  }
-
-  // Single shared observer for all .list-title elements (sticky at top: 0)
-  val listTitleOptions = js.Dynamic
-    .literal(
-      root = container,
-      threshold = 0
-    )
-    .asInstanceOf[IntersectionObserverInit]
-
-  val listTitleObserver = new IntersectionObserver(
+// Context for sharing observers across components
+class StickyObserverContext(container: Element) {
+  val listTitleObserver: IntersectionObserver = new IntersectionObserver(
     (entries, _) => {
       entries.foreach { entry =>
         val sentinel = entry.target.asInstanceOf[HTMLElement]
@@ -189,27 +175,12 @@ def setupStickyObservers(container: Element): Unit = {
         updateShadows(parent)
       }
     },
-    listTitleOptions
+    js.Dynamic
+      .literal(root = container, threshold = 0)
+      .asInstanceOf[IntersectionObserverInit]
   )
 
-  // Insert sentinels and observe all list-titles with the shared observer
-  container.querySelectorAll(".list-title").foreach { titleEl =>
-    val title = titleEl.asInstanceOf[HTMLElement]
-    val sentinel = createSentinel()
-    title.parentElement.insertBefore(sentinel, title)
-    listTitleObserver.observe(sentinel)
-  }
-
-  // Single shared observer for all .sub-title elements (sticky at top: 60px)
-  val subTitleOptions = js.Dynamic
-    .literal(
-      root = container,
-      rootMargin = "-60px 0px 0px 0px",
-      threshold = 0
-    )
-    .asInstanceOf[IntersectionObserverInit]
-
-  val subTitleObserver = new IntersectionObserver(
+  val subTitleObserver: IntersectionObserver = new IntersectionObserver(
     (entries, _) => {
       entries.foreach { entry =>
         val sentinel = entry.target.asInstanceOf[HTMLElement]
@@ -217,28 +188,46 @@ def setupStickyObservers(container: Element): Unit = {
         val isStuck = !entry.isIntersecting
         subTitle.classList.toggle("is-stuck", isStuck)
         setShadow(subTitle, isStuck, isList = false)
-        // Update parent list-item's shadow logic
         val listItem = subTitle.closest(".list-item")
         if (listItem != null) updateShadows(listItem)
       }
     },
-    subTitleOptions
+    js.Dynamic
+      .literal(
+        root = container,
+        rootMargin = "-60px 0px 0px 0px",
+        threshold = 0
+      )
+      .asInstanceOf[IntersectionObserverInit]
   )
-
-  // Insert sentinels and observe all sub-titles with the shared observer
-  container.querySelectorAll(".sub-title").foreach { subTitleEl =>
-    val subTitle = subTitleEl.asInstanceOf[HTMLElement]
-    val sentinel = createSentinel()
-    subTitle.parentElement.insertBefore(sentinel, subTitle)
-    subTitleObserver.observe(sentinel)
-  }
 }
+
+val scrollContainer = div()
+val observerContext = new StickyObserverContext(scrollContainer.ref)
+
+// Sentinel elements that register with observers on mount
+def listTitleSentinel(): HtmlElement = div(
+  cls := "absolute h-px w-full top-0 left-0 pointer-events-none",
+  onMountCallback(ctx =>
+    observerContext.listTitleObserver.observe(ctx.thisNode.ref)
+  ),
+  onUnmountCallback(el => observerContext.listTitleObserver.unobserve(el.ref))
+)
+
+def subTitleSentinel(): HtmlElement = div(
+  cls := "absolute h-px w-full top-0 left-0 pointer-events-none",
+  onMountCallback(ctx =>
+    observerContext.subTitleObserver.observe(ctx.thisNode.ref)
+  ),
+  onUnmountCallback(el => observerContext.subTitleObserver.unobserve(el.ref))
+)
 
 def renderSubItem(subSection: SubSection): HtmlElement = {
   val collapsed = Var(false)
 
   div(
     cls := "sub-item relative",
+    subTitleSentinel(),
     div(
       cls := "sub-title py-3 px-5 cursor-pointer flex justify-between items-center bg-gray-50 text-gray-700 font-medium select-none sticky top-[60px] hover:bg-gray-200",
       onClick --> { _ => collapsed.update(!_) },
@@ -266,6 +255,7 @@ def renderSection(section: Section): HtmlElement = {
 
   div(
     cls := "list-item bg-white relative",
+    listTitleSentinel(),
     div(
       cls := "list-title py-4 px-5 cursor-pointer flex justify-between items-center bg-blue-500 text-white font-semibold text-lg select-none sticky top-0 z-10 hover:bg-blue-600",
       onClick --> { _ => collapsed.update(!_) },
@@ -288,13 +278,10 @@ def renderSection(section: Section): HtmlElement = {
 }
 
 def app(): HtmlElement = {
-  div(
+  scrollContainer.amend(
     cls := "max-w-3xl mx-auto h-[500px] overflow-y-auto border border-gray-300 bg-white relative",
     idAttr := "scrollContainer",
-    sectionData.map(renderSection),
-    onMountCallback { ctx =>
-      setupStickyObservers(ctx.thisNode.ref)
-    }
+    sectionData.map(renderSection)
   )
 }
 
