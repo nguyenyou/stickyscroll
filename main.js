@@ -3459,12 +3459,16 @@ $c_Lmain$package$.prototype.setShadow__Lorg_scalajs_dom_HTMLElement__Z__Z__V = (
   }
 });
 $c_Lmain$package$.prototype.updateShadows__Lorg_scalajs_dom_Element__V = (function(listItem) {
-  var listTitle = listItem.querySelector(".list-title");
-  var stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck");
-  if (((listTitle !== null) && $uZ($n($m_Lmain$package$().Lmain$package$__f_stuckState).getOrElse__O__F0__O(listTitle, new $c_sr_AbstractFunction0_$$Lambda$a02b774b97db8234e08c6a02dd06557c99779855((() => false)))))) {
-    var shouldHaveShadow = ($uI(stuckSubTitles.length) === 0);
-    listTitle.classList.toggle("is-stuck", shouldHaveShadow);
-    listTitle.classList.toggle("shadow-md", shouldHaveShadow);
+  var listTitleOpt = $m_s_Option$().apply__O__s_Option(listItem.querySelector(".list-title"));
+  var this$1 = $n(listTitleOpt);
+  if ((!this$1.isEmpty__Z())) {
+    var x0 = this$1.get__O();
+    var stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck");
+    if ($uZ($n($m_Lmain$package$().Lmain$package$__f_stuckState).getOrElse__O__F0__O(x0, new $c_sr_AbstractFunction0_$$Lambda$a02b774b97db8234e08c6a02dd06557c99779855((() => false))))) {
+      var shouldHaveShadow = ($uI(stuckSubTitles.length) === 0);
+      x0.classList.toggle("is-stuck", shouldHaveShadow);
+      x0.classList.toggle("shadow-md", shouldHaveShadow);
+    }
   }
 });
 $c_Lmain$package$.prototype.listTitleSentinel__Lcom_raquo_laminar_nodes_ReactiveHtmlElement = (function() {
@@ -7051,6 +7055,29 @@ $c_s_LowPriorityImplicits.prototype.wrapRefArray__AO__scm_ArraySeq$ofRef = (func
     return new $c_scm_ArraySeq$ofRef(xs);
   }
 });
+/** @constructor */
+function $c_s_Option$() {
+}
+$c_s_Option$.prototype = new $h_O();
+$c_s_Option$.prototype.constructor = $c_s_Option$;
+/** @constructor */
+function $h_s_Option$() {
+}
+$h_s_Option$.prototype = $c_s_Option$.prototype;
+$c_s_Option$.prototype.apply__O__s_Option = (function(x) {
+  return ((x === null) ? $m_s_None$() : new $c_s_Some(x));
+});
+var $d_s_Option$ = new $TypeData().initClass($c_s_Option$, "scala.Option$", ({
+  s_Option$: 1,
+  Ljava_io_Serializable: 1
+}));
+var $n_s_Option$;
+function $m_s_Option$() {
+  if ((!$n_s_Option$)) {
+    $n_s_Option$ = new $c_s_Option$();
+  }
+  return $n_s_Option$;
+}
 function $f_s_PartialFunction__applyOrElse__O__F1__O($thiz, x, default$1) {
   return ($thiz.isDefinedAt__O__Z(x) ? $thiz.apply__O__O(x) : $n(default$1).apply__O__O(x));
 }

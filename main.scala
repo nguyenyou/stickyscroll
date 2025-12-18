@@ -149,14 +149,15 @@ def setShadow(el: HTMLElement, stuck: Boolean, isList: Boolean): Unit = {
 }
 
 def updateShadows(listItem: Element): Unit = {
-  val listTitle = listItem.querySelector(".list-title")
-  val stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck")
+  Option(listItem.querySelector(".list-title")).foreach { listTitle =>
+    val stuckSubTitles = listItem.querySelectorAll(".sub-title.is-stuck")
 
-  if (listTitle != null && stuckState.getOrElse(listTitle, false)) {
-    // List title only gets shadow if no sub-titles are stuck
-    val shouldHaveShadow = stuckSubTitles.length == 0
-    listTitle.classList.toggle("is-stuck", shouldHaveShadow)
-    listTitle.classList.toggle("shadow-md", shouldHaveShadow)
+    if (stuckState.getOrElse(listTitle, false)) {
+      // List title only gets shadow if no sub-titles are stuck
+      val shouldHaveShadow = stuckSubTitles.length == 0
+      listTitle.classList.toggle("is-stuck", shouldHaveShadow)
+      listTitle.classList.toggle("shadow-md", shouldHaveShadow)
+    }
   }
 }
 
