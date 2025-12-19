@@ -283,6 +283,5 @@ def app(): HtmlElement = {
 
 @main
 def run(): Unit = {
-  val container = dom.document.getElementById("app")
-  render(container, app())
+  render(dom.document.getElementById("app"), app())
 }
