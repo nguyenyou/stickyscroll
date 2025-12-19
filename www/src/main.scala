@@ -1,10 +1,4 @@
-//> using scala 3.7.4
-//> using platform scala-js
-
-//> using dep "org.scala-js::scalajs-dom::2.8.1"
-//> using dep "com.raquo::laminar::17.2.1"
-
-//> using jsModuleKind es
+package www
 
 import org.scalajs.dom
 import org.scalajs.dom.{
@@ -287,14 +281,8 @@ def app(): HtmlElement = {
   )
 }
 
-def printnum(num: Int): Unit = {
-  org.scalajs.dom.console.log(num)
-}
-
 @main
 def run(): Unit = {
-  val x: Int = 5
-  printnum(x)
   val container = dom.document.getElementById("app")
   render(container, app())
 }
